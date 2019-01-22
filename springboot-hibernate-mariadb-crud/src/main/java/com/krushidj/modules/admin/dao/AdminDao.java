@@ -10,9 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminDao<T> {
     @Autowired
     private MethodUtil<T> methodUtil;
-    {
-        System.out.println("util"+methodUtil);
-    }
+
     public void saveUser(T instance) throws Throwable {
         methodUtil.save(instance);
     }
