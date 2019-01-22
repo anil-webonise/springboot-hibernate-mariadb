@@ -15,5 +15,11 @@ public class AdminDao<T> {
         methodUtil.save(instance);
     }
 
+    public void deleteUser(String tableName,Long id) throws Throwable {
+        methodUtil.delete(tableName, id);
+
+    }
+
+
 
 }

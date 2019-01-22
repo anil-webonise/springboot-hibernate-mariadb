@@ -1,5 +1,7 @@
 package com.krushidj.utils;
 
+import com.krushidj.constants.CommonConstatnts;
+import com.krushidj.constants.PackageConstatnt;
 import com.krushidj.modules.exception.GlobalException;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -11,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -20,7 +21,7 @@ import javax.persistence.Query;
 import java.util.List;
 
 @Component
-@ComponentScan(basePackages = "com.krushidj")
+@ComponentScan(basePackages = PackageConstatnt.basePackages)
 public class MethodUtil<T> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -45,13 +46,12 @@ public class MethodUtil<T> {
                 session.save(entity);
                 entityManager.getTransaction().commit();
             } else {
-                throw new GlobalException("An error occurred while saving . Please contact Support Team.");
+                throw new GlobalException(CommonConstatnts.errorMsg + CommonConstatnts.savingData + CommonConstatnts.constactSupportTeamMsg);
             }
-
         } catch (Exception e) {
             entityManager.getTransaction().rollback();
-            log.error("An error occurred while saving Data", e);
-            throw new GlobalException("An error occurred while saving Data. Please contact Support Team.");
+            log.error(CommonConstatnts.errorMsg + CommonConstatnts.savingData, e);
+            throw new GlobalException(CommonConstatnts.errorMsg + CommonConstatnts.savingData + CommonConstatnts.constactSupportTeamMsg);
         } finally {
             if (session != null) {
                 session.close();
@@ -90,31 +90,29 @@ public class MethodUtil<T> {
 
     public void delete(String tableName, Long id) throws Throwable {
         Session session = null;
-        Transaction txn = null;
         try {
 
             session = sessionFactory.openSession();
-            txn = session != null ? session.beginTransaction() : null;
-            if (session != null && txn != null) {
-                String hql = "UPDATE " + tableName + "set active = :active WHERE id = :id";
+            entityManager.getTransaction().begin();
+            if (session != null) {
+                String hql = "UPDATE " + tableName + "set active =:active" + " WHERE id =:id";
+                System.out.println(hql);
                 Query query = session.createQuery(hql);
-                query.setParameter("active", false);
+                query.setParameter("active", 0);
                 query.setParameter("id", id);
                 query.executeUpdate();
-                txn.commit();
+                entityManager.getTransaction().commit();
             } else {
-                throw new GlobalException("An error occurred while deleting . Please contact Support Team.");
+                throw new GlobalException(CommonConstatnts.errorMsg + CommonConstatnts.deletingData + CommonConstatnts.constactSupportTeamMsg);
             }
-
         } catch (Exception e) {
-            log.error("An error occurred while saving Data", e);
-            throw new GlobalException("An error occurred while deleteing Data. Please contact Support Team.");
+            e.printStackTrace();
+            entityManager.getTransaction().rollback();
+            log.error(CommonConstatnts.errorMsg + CommonConstatnts.deletingData, e);
+            throw new GlobalException(CommonConstatnts.errorMsg + CommonConstatnts.deletingData + CommonConstatnts.constactSupportTeamMsg);
         } finally {
-            if (txn != null) {
-                txn.rollback();
-            }
             if (session != null) {
-                session.flush();
+                // session.flush();
                 session.close();
             }
         }
