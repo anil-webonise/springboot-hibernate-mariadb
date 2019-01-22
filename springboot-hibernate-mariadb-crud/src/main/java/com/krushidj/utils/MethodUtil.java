@@ -11,48 +11,49 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import java.util.List;
 
 @Component
-@ComponentScan(basePackages = { "com.krushidj" })
+@ComponentScan(basePackages = "com.krushidj")
 public class MethodUtil<T> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private EntityManagerFactory entityManagerFactory;
-    SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-    {
-        System.out.println(sessionFactory);
+
+    private SessionFactory sessionFactory;
+    private EntityManager entityManager;
+
+    @PostConstruct
+    public void init() {
+        sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+        entityManager = entityManagerFactory.createEntityManager();
     }
 
+
     public void save(T entity) throws Throwable {
-        Session session = null;
-        Transaction txn = null;
+        Session session = sessionFactory.openSession();
         try {
-            session = sessionFactory.openSession();
-            txn = session != null ? session.beginTransaction() : null;
-            if (session != null && txn != null) {
+            entityManager.getTransaction().begin();
+            if (session != null) {
                 session.save(entity);
-                txn.commit();
+                entityManager.getTransaction().commit();
             } else {
                 throw new GlobalException("An error occurred while saving . Please contact Support Team.");
             }
 
         } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
+            entityManager.getTransaction().rollback();
             log.error("An error occurred while saving Data", e);
             throw new GlobalException("An error occurred while saving Data. Please contact Support Team.");
         } finally {
-            if (txn != null) {
-                txn.rollback();
-            }
             if (session != null) {
-                session.flush();
                 session.close();
             }
         }
@@ -87,7 +88,7 @@ public class MethodUtil<T> {
         }
     }
 
-    public void delete(String tableName,Long id) throws Throwable {
+    public void delete(String tableName, Long id) throws Throwable {
         Session session = null;
         Transaction txn = null;
         try {

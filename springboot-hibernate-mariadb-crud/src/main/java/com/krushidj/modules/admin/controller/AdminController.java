@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1")
 public class AdminController {
+
     @Autowired
     private AdminService adminService;
 
