@@ -1,5 +1,8 @@
 package com.krushidj.config;
 
+import com.krushidj.constants.PackageConstatnt;
+import com.krushidj.constants.SwaggerMetaDataInfoConstant;
+import com.krushidj.utils.CommonUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +16,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-@Profile("!production")
+@Profile(SwaggerMetaDataInfoConstant.swaggerProfile)
 public class SwaggerConfiguration {
 
-    private static final String CONTROLLERS_BASE_PACKAGE = "com.krushidj.modules.admin.controller";
 
     @Value("${api.version}")
     private String version;
@@ -25,7 +27,7 @@ public class SwaggerConfiguration {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage(CONTROLLERS_BASE_PACKAGE))
+                .apis(RequestHandlerSelectors.basePackage(CommonUtil.getAllControllerPackage()))
                 .build()
                 .apiInfo(apiInfo());
     }
@@ -33,8 +35,8 @@ public class SwaggerConfiguration {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("DRF USER PREFERENCE API")
-                .description("DRF User Preferences APP API in spring boot..!")
+                .title(SwaggerMetaDataInfoConstant.swaggerTitle)
+                .description(SwaggerMetaDataInfoConstant.swaggerDesciption)
                 .version(version)
                 .build();
     }

@@ -22,7 +22,7 @@ public class AdminController {
     public ResponseEntity<String> saveUser(@RequestBody User user) throws Throwable {
         adminService.saveUser(user);
         HttpHeaders responseHeaders = new HttpHeaders();
-        return new ResponseEntity<String>("", responseHeaders, HttpStatus.OK);
+        return new ResponseEntity<String>("ok", responseHeaders, HttpStatus.OK);
     }
 
 }
